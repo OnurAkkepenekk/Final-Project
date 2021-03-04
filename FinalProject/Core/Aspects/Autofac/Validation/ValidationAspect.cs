@@ -9,11 +9,12 @@ using System.Text;
 
 namespace Core.Aspects.Autofac.Validation
 {
-    public class ValidationAspect : MethodInterception
+    public class ValidationAspect : MethodInterception // Aspect: Methodun başında sonunda hata verdiğinde çalışacak yapıdır. Nerede istersen orada çalışır(OnAfter, OnBefore)
     {
         private Type _validatorType;
         public ValidationAspect(Type validatorType)
         {
+            //defensive coding : Savunma odaklı kodlama 
             if (!typeof(IValidator).IsAssignableFrom(validatorType))
             {
                 throw new System.Exception("BU BİR DOĞRULAMA SINIFI DEGİLDİR.");
@@ -24,6 +25,7 @@ namespace Core.Aspects.Autofac.Validation
         protected override void OnBefore(IInvocation invocation)
         {
             //Reflection 
+            // Çalışma anında instance oluşturmak istersen Activator.CreateInstace(bir bakıma new) kullanırsın 
             var validator = (IValidator)Activator.CreateInstance(_validatorType);
             var entityType = _validatorType.BaseType.GetGenericArguments()[0];
             var entities = invocation.Arguments.Where(t => t.GetType() == entityType);
