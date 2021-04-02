@@ -2,7 +2,9 @@
 using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
 using Core.Aspects.Autofac.Validation;
+using Core.CrossCuttingConcerns.Transaction;
 using Core.CrossCuttingConcerns.Validation;
 using Core.Utilities.Business;
 using Core.Utilities.Results;
@@ -29,6 +31,7 @@ namespace Business.Concrete
         }
         [SecuredOperation("product.add,admin")]
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Add(Product product)
         {
             IResult result = BusinessRules.Run(CheckIfProductCountOfCategoryCorrect(product.CategoryId),
@@ -70,10 +73,17 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails());
         }
-
+        [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Update(Product product)
         {
-            throw new NotImplementedException();
+            var result = _productDal.GetAll(p => p.CategoryId == product.CategoryId);
+            if (result.Count >= 10)
+            {
+                return new ErrorResult("...");
+            }
+            return new SuccessResult();
+
         }
 
         private IResult CheckIfProductCountOfCategoryCorrect(int categoryId)
@@ -105,6 +115,10 @@ namespace Business.Concrete
                 return new ErrorResult(Messages.CategoryLimitExceded);
             }
         }
-
+        [TransactionScopeAspect]
+        public IResult AddTransactionalTest(Product product)
+        {
+            
+        }
     }
 }
