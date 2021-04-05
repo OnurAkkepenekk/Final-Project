@@ -116,9 +116,10 @@ namespace Business.Concrete
             }
         }
         [TransactionScopeAspect]
+
         public IResult AddTransactionalTest(Product product)
         {
-            
+            throw new NotImplementedException();
         }
     }
 }
