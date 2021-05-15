@@ -29,7 +29,8 @@ namespace Business.Concrete
             this._productDal = productDal;
             this._categoryService = categoryService;
         }
-        //[SecuredOperation("product.add,admin")]
+        //Claim
+        [SecuredOperation("product.add,admin")]
         [ValidationAspect(typeof(ProductValidator))]
         [CacheRemoveAspect("IProductService.Get")]
         public IResult Add(Product product)
